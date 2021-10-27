@@ -3,7 +3,7 @@
 readonly SCRIPT_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 readonly UNIFIED_AGENT_JAR="wss-unified-agent.jar"
-readonly UNIFIED_AGENT_JAR_MD5_CHECKSUM="F2EB843816A572904954052756EB66E7" # MD5 hash for version 21.6.1
+readonly UNIFIED_AGENT_JAR_MD5_CHECKSUM="706694E349EA14CB04C4621B70D99A93" # MD5 hash for version 29.9.1.1
 readonly UNIFIED_AGENT_JAR_URL="https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar"
 
 get_unified_agent() {
@@ -64,8 +64,10 @@ scan() {
   fi
   export WS_PROJECTNAME="${WS_PRODUCTNAME} ${PROJECT_VERSION%.*}"
   echo "${WS_PRODUCTNAME} - ${WS_PROJECTNAME}"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/docs/java-custom-rules-example/target/java-custom-rules-example-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/docs/java-custom-rules-example"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/external-reports/target/external-reports-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/external-reports"
+  echo "****************************************************************************************************************************************************"
+  echo java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/docs/java-custom-rules-example/target/java-custom-rules-example-${PROJECT_VERSION%.*}-SNAPSHOT.jar" -d "${SCRIPT_DIRECTORY}/docs/java-custom-rules-example"
+  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/external-reports/target/external-reports-${PROJECT_VERSION%.*}-SNAPSHOT.jar" -d "${SCRIPT_DIRECTORY}/external-reports"
+  exit $?
   java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/its/plugin/tests/target/it-java-plugin-tests-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/its/plugin/tests"
   java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/its/plugin/plugins/java-extension-plugin/target/java-extension-plugin-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/its/plugin/plugins/java-extension-plugin"
   java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/its/ruling/target/it-java-ruling-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/its/ruling"
