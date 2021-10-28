@@ -57,6 +57,18 @@ get_project_version() {
   fi
 }
 
+scan_module() {
+  local folder="${1}"
+  local version="${2}"
+  local module_name=$(basename "${1}")
+  local app_path="${folder}/target/${module_name}-${version}.jar"
+  if [[ -f "${app_path}" ]]; then
+    java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${app_path}" -d "${folder}"
+  else
+    echo "Could not find target jar path: ${app_path}" >&2
+  fi
+}
+
 scan() {
   export WS_PRODUCTNAME=$(get_product_name)
   if [[ -z "${PROJECT_VERSION}" ]]; then
@@ -65,30 +77,19 @@ scan() {
   export WS_PROJECTNAME="${WS_PRODUCTNAME} ${PROJECT_VERSION%.*}"
   echo "${WS_PRODUCTNAME} - ${WS_PROJECTNAME}"
   echo "****************************************************************************************************************************************************"
-  local app_path="${SCRIPT_DIRECTORY}/docs/java-custom-rules-example/target/java-custom-rules-example-${PROJECT_VERSION}.jar"
-  if [[ -f ${app_path} ]]; then
-    echo "->\t${app_path} exists"
-  else
-    echo -e "->\t${app_path} does not exist"
-    ls -al $(dirname "${app_path}")
-    pwd
-    ls -al .
-    exit 1
-  fi
-  echo java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${app_path}" -d "${SCRIPT_DIRECTORY}/docs/java-custom-rules-example"
-  exit $?
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/external-reports/target/external-reports-${PROJECT_VERSION%.*}-SNAPSHOT.jar" -d "${SCRIPT_DIRECTORY}/external-reports"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/its/plugin/tests/target/it-java-plugin-tests-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/its/plugin/tests"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/its/plugin/plugins/java-extension-plugin/target/java-extension-plugin-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/its/plugin/plugins/java-extension-plugin"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/its/ruling/target/it-java-ruling-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/its/ruling"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/java-checks/target/java-checks-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/java-checks"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/java-checks-testkit/target/java-checks-testkit-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/java-checks-testkit"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/java-frontend/target/java-frontend-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/java-frontend"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/java-jsp/target/java-jsp-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/java-jsp"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/java-surefire/target/java-surefire-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/java-surefire"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/java-symbolic-execution/target/java-symbolic-execution-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/java-symbolic-execution"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/jdt/target/jdt-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/jdt"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/sonar-java-plugin/target/sonar-java-plugin-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/sonar-java-plugin"
+  scan_module "${SCRIPT_DIRECTORY}/docs/java-custom-rules-example" "${PROJECT_VERSION}"
+  scan_module "${SCRIPT_DIRECTORY}/external-reports" "${PROJECT_VERSION}"
+  scan_module "${SCRIPT_DIRECTORY}/its/plugin/tests" "${PROJECT_VERSION}"
+  scan_module "${SCRIPT_DIRECTORY}/its/plugin/plugins/java-extension-plugin" "${PROJECT_VERSION}"
+  scan_module "${SCRIPT_DIRECTORY}/its/ruling" "${PROJECT_VERSION}"
+  scan_module "${SCRIPT_DIRECTORY}/java-checks" "${PROJECT_VERSION}"
+  scan_module "${SCRIPT_DIRECTORY}/java-checks-testkit" "${PROJECT_VERSION}"
+  scan_module "${SCRIPT_DIRECTORY}/java-frontend" "${PROJECT_VERSION}"
+  scan_module "${SCRIPT_DIRECTORY}/java-jsp" "${PROJECT_VERSION}"
+  scan_module "${SCRIPT_DIRECTORY}/java-surefire" "${PROJECT_VERSION}"
+  scan_module "${SCRIPT_DIRECTORY}/java-symbolic-execution" "${PROJECT_VERSION}"
+  scan_module "${SCRIPT_DIRECTORY}/jdt" "${PROJECT_VERSION}"
+  scan_module "${SCRIPT_DIRECTORY}/sonar-java-plugin" "${PROJECT_VERSION}"
 }
 
 get_unified_agent
