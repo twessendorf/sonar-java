@@ -65,9 +65,19 @@ scan() {
   export WS_PROJECTNAME="${WS_PRODUCTNAME} ${PROJECT_VERSION%.*}"
   echo "${WS_PRODUCTNAME} - ${WS_PROJECTNAME}"
   echo "****************************************************************************************************************************************************"
-  echo java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/docs/java-custom-rules-example/target/java-custom-rules-example-${PROJECT_VERSION%.*}-SNAPSHOT.jar" -d "${SCRIPT_DIRECTORY}/docs/java-custom-rules-example"
-  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/external-reports/target/external-reports-${PROJECT_VERSION%.*}-SNAPSHOT.jar" -d "${SCRIPT_DIRECTORY}/external-reports"
+  local app_path="${SCRIPT_DIRECTORY}/docs/java-custom-rules-example/target/java-custom-rules-example-${PROJECT_VERSION}.jar"
+  if [[ -f ${app_path} ]]; then
+    echo "->\t${app_path} exists"
+  else
+    echo -e "->\t${app_path} does not exist"
+    ls -al $(dirname "${app_path}")
+    pwd
+    ls -al .
+    exit 1
+  fi
+  echo java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${app_path}" -d "${SCRIPT_DIRECTORY}/docs/java-custom-rules-example"
   exit $?
+  java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/external-reports/target/external-reports-${PROJECT_VERSION%.*}-SNAPSHOT.jar" -d "${SCRIPT_DIRECTORY}/external-reports"
   java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/its/plugin/tests/target/it-java-plugin-tests-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/its/plugin/tests"
   java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/its/plugin/plugins/java-extension-plugin/target/java-extension-plugin-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/its/plugin/plugins/java-extension-plugin"
   java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${SCRIPT_DIRECTORY}/its/ruling/target/it-java-ruling-${PROJECT_VERSION}.jar" -d "${SCRIPT_DIRECTORY}/its/ruling"
