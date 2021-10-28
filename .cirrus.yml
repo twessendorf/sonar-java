@@ -67,6 +67,7 @@ ws_scan_task:
   <<: *ONLY_SONARSOURCE_QA
   gke_container:
     <<: *CONTAINER_DEFINITION
+    image: gcr.io/language-team/base-jdk16:latest
     cpu: 2
     memory: 2G
   env:
