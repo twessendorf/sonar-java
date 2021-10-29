@@ -6,6 +6,9 @@ readonly UNIFIED_AGENT_JAR="wss-unified-agent.jar"
 readonly UNIFIED_AGENT_JAR_MD5_CHECKSUM="706694E349EA14CB04C4621B70D99A93" # MD5 hash for version 29.9.1.1
 readonly UNIFIED_AGENT_JAR_URL="https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar"
 
+readonly JDK_11="./jdk-11/"
+
+
 get_unified_agent() {
   if [[ ! -f "${UNIFIED_AGENT_JAR}" ]]; then
     curl \
@@ -57,16 +60,29 @@ get_project_version() {
   fi
 }
 
+download_jdk_11() {
+  curl \
+    --location \
+    --remote-name \
+    --remote-header-name https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_linux-x64_bin.tar.gz
+  tar xaf openjdk-11+28_linux-x64_bin.tar.gz
+}
+
 scan_module() {
   local folder="${1}"
   local version="${2}"
   local module_name=$(basename "${1}")
+  if [[ ! -d "${JDK_11}" ]]; then
+    download_jdk_11
+  fi
+  export JAVA_HOME="$(readlink -f ${JDK_11})"
   local app_path="${folder}/target/${module_name}-${version}.jar"
   if [[ -f "${app_path}" ]]; then
     java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${app_path}" -d "${folder}"
   else
     echo "Could not find target jar path: ${app_path}" >&2
   fi
+  unset JAVA_HOME
 }
 
 scan() {
