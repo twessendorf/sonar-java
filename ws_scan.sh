@@ -78,7 +78,7 @@ scan_module() {
   export JAVA_HOME="$(readlink -f ${JDK_11})"
   local app_path="${folder}/target/${module_name}-${version}.jar"
   if [[ -f "${app_path}" ]]; then
-    java -jar wss-unified-agent.jar -c whitesource.properties -appPath "${app_path}" -d "${folder}"
+    java --illegal-access=warn -jar wss-unified-agent.jar -c whitesource.properties -appPath "${app_path}" -d "${folder}"
   else
     echo "Could not find target jar path: ${app_path}" >&2
   fi
