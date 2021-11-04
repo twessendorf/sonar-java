@@ -72,13 +72,8 @@ ws_scan_task:
     memory: 2G
   env:
     WS_APIKEY: ENCRYPTED[cda363e6bcac3edd4c259dc05b3570e00152ad50f9ad3ec3cab72d57cda318a0d5472e37c656c3566c2cb8c752d2f5a0]
-    WS_WSS_URL: https://saas-eu.whitesourcesoftware.com/agent
     WS_PRODUCTNAME: SonarJava
     WS_PROJECTNAME: SonarJava
-    WS_RESOLVEALLDEPENDENCIES: false
-    WS_MAVEN_RESOLVEDEPENDENCIES: true
-    WS_FILESYSTEMSCAN: false
-    WS_MAVEN_AGGREGATEMODULES: true
     WS_EXCLUDES: "**/*sources.jar **/*javadoc.jar **/its/sources/**"
     MODULES: "docs/java-custom-rules-example,external-reports,its/plugin/tests,its/plugin/plugins/java-extension-plugin,its/ruling,java-checks,java-checks-testkit,java-frontend,java-jsp,java-surefire,java-symbolic-execution,jdt,sonar-java-plugin"
   maven_cache:
