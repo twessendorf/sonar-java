@@ -81,7 +81,7 @@ ws_scan_task:
   whitesource_script:
     - source cirrus-env QA
     - source set_maven_build_version $BUILD_NUMBER
-    - mvn clean install --batch-mode --errors --show-version
+    - mvn clean install -DskipTests=true --batch-mode --errors --show-version
     - ./ws_scan.sh
   cleanup_before_cache_script: cleanup_maven_repository
 
