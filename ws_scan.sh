@@ -1,21 +1,7 @@
 #! /usr/bin/env bash
 
 readonly SCRIPT_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-readonly MODULES=(
-  "docs/java-custom-rules-example"
-  "external-reports"
-  "its/plugin/tests"
-  "its/plugin/plugins/java-extension-plugin"
-  "its/ruling"
-  "java-checks"
-  "java-checks-testkit"
-  "java-frontend"
-  "java-jsp"
-  "java-surefire"
-  "java-symbolic-execution"
-  "jdt"
-  "sonar-java-plugin"
-)
+readonly DEFAULT_MODULES="./"
 
 readonly UNIFIED_AGENT_JAR="wss-unified-agent.jar"
 readonly UNIFIED_AGENT_JAR_URL="https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar"
@@ -123,15 +109,13 @@ scan() {
   export WS_PROJECTNAME="${WS_PRODUCTNAME} ${PROJECT_VERSION%.*}"
   echo "${WS_PRODUCTNAME} - ${WS_PROJECTNAME}"
   local modules=""
-  for module in "${MODULES[@]}"; do
-    local path_to_module="${SCRIPT_DIRECTORY}/${module}"
-    if [[ -z "${modules}" ]]; then
-      modules="${path_to_module}"
-    else
-      modules="${modules},${path_to_module}"
-    fi
-  done
+  if [[ -z "${MODULES}" ]]; then
+    modules="${DEFAULT_MODULES}"
+  else
+    modules="${MODULES}"
+  fi
   local path_to_jar="${SCRIPT_DIRECTORY}/sonar-java-plugin/target/sonar-java-plugin-${PROJECT_VERSION}.jar"
+  echo "MODULES=${MODULES}"
   scan_multi_module "${modules}" "${path_to_jar}"
 }
 
