@@ -108,15 +108,18 @@ scan() {
   fi
   export WS_PROJECTNAME="${WS_PRODUCTNAME} ${PROJECT_VERSION%.*}"
   echo "${WS_PRODUCTNAME} - ${WS_PROJECTNAME}"
-  local modules=""
-  if [[ -z "${MODULES}" ]]; then
-    modules="${DEFAULT_MODULES}"
-  else
-    modules="${MODULES}"
-  fi
   local path_to_jar="${SCRIPT_DIRECTORY}/sonar-java-plugin/target/sonar-java-plugin-${PROJECT_VERSION}.jar"
+  if [[ -z "${MODULES}" ]]; then
+    scan_multi_module DEFAULT_MODULES "${path_to_jar}"
+  else
+    local split_modules
+    IFS="," read -ra split_modules <<< "${MODULES}"
+    for module in "${split_modules[@]}"; do
+      scan_module "${module}" "${PROJECT_VERSION}"
+    done
+  fi
   echo "MODULES=${MODULES}"
-  scan_multi_module "${modules}" "${path_to_jar}"
+
 }
 
 get_unified_agent
