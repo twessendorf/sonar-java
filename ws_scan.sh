@@ -80,7 +80,7 @@ download_jdk_11() {
 }
 
 scan_module() {
-  local folder="${1}"
+  local modules="${1}"
   local version="${2}"
   local module_name
   module_name=$(basename "${1}")
@@ -89,9 +89,25 @@ scan_module() {
   fi
   JAVA_HOME="$(readlink -f ${JDK_11})"
   export JAVA_HOME
-  local app_path="${folder}/target/${module_name}-${version}.jar"
+  local app_path="${modules}/target/${module_name}-${version}.jar"
   if [[ -f "${app_path}" ]]; then
-    java --illegal-access=warn -jar wss-unified-agent.jar -c whitesource.properties -appPath "${app_path}" -d "${folder}"
+    java --illegal-access=warn -jar wss-unified-agent.jar -c whitesource.properties -appPath "${app_path}" -d "${modules}"
+  else
+    echo "Could not find target jar path: ${app_path}" >&2
+  fi
+  unset JAVA_HOME
+}
+
+scan_multi_module() {
+  local modules="${1}"
+  local app_path="${2}"
+  if [[ ! -d "${JDK_11}" ]]; then
+    download_jdk_11
+  fi
+  JAVA_HOME="$(readlink -f ${JDK_11})"
+  export JAVA_HOME
+  if [[ -f "${app_path}" ]]; then
+    java --illegal-access=warn -jar ${UNIFIED_AGENT_JAR} -c whitesource.properties -appPath "${app_path}" -d "${modules}"
   else
     echo "Could not find target jar path: ${app_path}" >&2
   fi
@@ -106,11 +122,17 @@ scan() {
   fi
   export WS_PROJECTNAME="${WS_PRODUCTNAME} ${PROJECT_VERSION%.*}"
   echo "${WS_PRODUCTNAME} - ${WS_PROJECTNAME}"
-  echo "****************************************************************************************************************************************************"
+  local modules=""
   for module in "${MODULES[@]}"; do
     local path_to_module="${SCRIPT_DIRECTORY}/${module}"
-    scan_module "${path_to_module}" "${PROJECT_VERSION}"
+    if [[ -z "${modules}" ]]; then
+      modules="${path_to_module}"
+    else
+      modules="${modules},${path_to_module}"
+    fi
   done
+  local path_to_jar="${SCRIPT_DIRECTORY}/sonar-java-plugin/target/sonar-java-plugin-${PROJECT_VERSION}.jar"
+  scan_multi_module "${modules}" "${path_to_jar}"
 }
 
 get_unified_agent
