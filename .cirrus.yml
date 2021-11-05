@@ -75,7 +75,6 @@ ws_scan_task:
     WS_PRODUCTNAME: SonarJava
     WS_PROJECTNAME: SonarJava
     WS_EXCLUDES: "**/*sources.jar **/*javadoc.jar **/its/sources/**"
-    MODULES: "docs/java-custom-rules-example,external-reports,its/plugin/tests,its/plugin/plugins/java-extension-plugin,its/ruling,java-checks,java-checks-testkit,java-frontend,java-jsp,java-surefire,java-symbolic-execution,jdt,sonar-java-plugin"
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   whitesource_script:
