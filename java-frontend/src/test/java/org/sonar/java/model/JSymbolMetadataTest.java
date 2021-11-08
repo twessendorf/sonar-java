@@ -22,6 +22,8 @@ package org.sonar.java.model;
 import org.junit.jupiter.api.Test;
 import org.sonar.java.model.declaration.ClassTreeImpl;
 import org.sonar.plugins.java.api.semantic.SymbolMetadata;
+import org.sonar.plugins.java.api.tree.MethodTree;
+import org.sonar.plugins.java.api.tree.VariableTree;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,6 +42,107 @@ class JSymbolMetadataTest {
   @Test
   void unknown_nullability() {
     JavaTree.CompilationUnitTreeImpl cu = test("class A {}");
+    ClassTreeImpl c = (ClassTreeImpl) cu.types().get(0);
+    SymbolMetadata.NullabilityData nullabilityData = c.symbol().metadata().nullabilityData();
+    assertThat(nullabilityData.isNonNull(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isFalse();
+    assertThat(nullabilityData.annotation()).isNull();
+    assertThat(nullabilityData.level()).isEqualTo(SymbolMetadata.NullabilityLevel.UNKNOWN);
+    assertThat(nullabilityData.declaration()).isNull();
+  }
+
+  @Test
+  @javax.annotation.Nonnull
+  void parameter_directly_annotated_non_null() {
+    JavaTree.CompilationUnitTreeImpl cu = test("class A { void f(@javax.annotation.Nonnull int a) {} }");
+    ClassTreeImpl c = (ClassTreeImpl) cu.types().get(0);
+    MethodTree methodTree = (MethodTree) c.members().get(0);
+    VariableTree variableTree = methodTree.parameters().get(0);
+
+    SymbolMetadata.NullabilityData nullabilityData = variableTree.symbol().metadata().nullabilityData();
+
+    assertThat(nullabilityData.isNonNull(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isTrue();
+    assertThat(nullabilityData.isNullable(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isFalse();
+    assertThat(nullabilityData.isStrongNullable(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isFalse();
+
+    assertThat(nullabilityData.annotation()).isNotNull();
+    assertThat(nullabilityData.level()).isEqualTo(SymbolMetadata.NullabilityLevel.VARIABLE);
+//    assertThat(nullabilityData.declaration()).isEqualTo(variableTree.modifiers().get(0)); // FIXME
+  }
+
+  @Test
+  void parameter_directly_annotated_nullable() {
+    JavaTree.CompilationUnitTreeImpl cu = test("class A { void f(@javax.annotation.Nullable int a) {} }");
+    ClassTreeImpl c = (ClassTreeImpl) cu.types().get(0);
+    MethodTree methodTree = (MethodTree) c.members().get(0);
+    VariableTree variableTree = methodTree.parameters().get(0);
+
+    SymbolMetadata.NullabilityData nullabilityData = variableTree.symbol().metadata().nullabilityData();
+
+    assertThat(nullabilityData.isNullable(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isTrue();
+    assertThat(nullabilityData.isNonNull(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isFalse();
+    assertThat(nullabilityData.isStrongNullable(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isFalse();
+    assertThat(nullabilityData.annotation()).isNotNull();
+    assertThat(nullabilityData.level()).isEqualTo(SymbolMetadata.NullabilityLevel.VARIABLE);
+//    assertThat(nullabilityData.declaration()).isEqualTo(variableTree.modifiers().get(0)); // FIXME
+  }
+
+  @Test
+  void parameter_directly_annotated_strong_nullable() {
+    JavaTree.CompilationUnitTreeImpl cu = test("class A { void f(@javax.annotation.CheckForNull int a) {} }");
+    ClassTreeImpl c = (ClassTreeImpl) cu.types().get(0);
+    MethodTree methodTree = (MethodTree) c.members().get(0);
+    VariableTree variableTree = methodTree.parameters().get(0);
+
+    SymbolMetadata.NullabilityData nullabilityData = variableTree.symbol().metadata().nullabilityData();
+
+    assertThat(nullabilityData.isNullable(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isTrue();
+    assertThat(nullabilityData.isStrongNullable(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isTrue();
+    assertThat(nullabilityData.isNonNull(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isFalse();
+
+    assertThat(nullabilityData.annotation()).isNotNull();
+    assertThat(nullabilityData.level()).isEqualTo(SymbolMetadata.NullabilityLevel.VARIABLE);
+//    assertThat(nullabilityData.declaration()).isEqualTo(variableTree.modifiers().get(0)); // FIXME
+  }
+
+  @Test
+  void parameter_directly_annotated_nullable_via_non_null() {
+    JavaTree.CompilationUnitTreeImpl cu = test("class A { void f(@javax.annotation.Nonnull(when=javax.annotation.meta.When.UNKNOWN) int a) {} }");
+    ClassTreeImpl c = (ClassTreeImpl) cu.types().get(0);
+    MethodTree methodTree = (MethodTree) c.members().get(0);
+    VariableTree variableTree = methodTree.parameters().get(0);
+
+    SymbolMetadata.NullabilityData nullabilityData = variableTree.symbol().metadata().nullabilityData();
+
+    assertThat(nullabilityData.isNullable(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isTrue();
+    assertThat(nullabilityData.isStrongNullable(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isFalse();
+    assertThat(nullabilityData.isNonNull(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isFalse();
+
+    assertThat(nullabilityData.annotation()).isNotNull();
+    assertThat(nullabilityData.level()).isEqualTo(SymbolMetadata.NullabilityLevel.VARIABLE);
+//    assertThat(nullabilityData.declaration()).isEqualTo(variableTree.modifiers().get(0)); // FIXME
+  }
+
+  @Test
+  void parameter_directly_annotated_strong_nullable_via_non_null() {
+    JavaTree.CompilationUnitTreeImpl cu = test("class A { void f(@javax.annotation.Nonnull(When.MAYBE) int a) {} }");
+    ClassTreeImpl c = (ClassTreeImpl) cu.types().get(0);
+    MethodTree methodTree = (MethodTree) c.members().get(0);
+    VariableTree variableTree = methodTree.parameters().get(0);
+
+    SymbolMetadata.NullabilityData nullabilityData = variableTree.symbol().metadata().nullabilityData();
+
+    assertThat(nullabilityData.isNullable(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isTrue();
+    assertThat(nullabilityData.isStrongNullable(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isTrue();
+    assertThat(nullabilityData.isNonNull(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isFalse();
+
+    assertThat(nullabilityData.annotation()).isNotNull();
+    assertThat(nullabilityData.level()).isEqualTo(SymbolMetadata.NullabilityLevel.VARIABLE);
+//    assertThat(nullabilityData.declaration()).isEqualTo(variableTree.modifiers().get(0)); // FIXME
+  }
+
+  @Test
+  void parameter_unknown_annotation() {
+    JavaTree.CompilationUnitTreeImpl cu = test("class A { void f(@Unknown int a) {} }");
     ClassTreeImpl c = (ClassTreeImpl) cu.types().get(0);
     SymbolMetadata.NullabilityData nullabilityData = c.symbol().metadata().nullabilityData();
     assertThat(nullabilityData.isNonNull(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isFalse();

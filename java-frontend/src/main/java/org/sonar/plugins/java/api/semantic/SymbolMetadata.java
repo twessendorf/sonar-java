@@ -53,6 +53,8 @@ public interface SymbolMetadata {
 
   NullabilityData nullabilityData();
 
+  NullabilityData nullabilityData(NullabilityTarget level);
+
   /**
    * Occurrence of an annotation on a symbol.
    */
@@ -107,6 +109,12 @@ public interface SymbolMetadata {
     VARIABLE
   }
 
+  enum NullabilityTarget {
+    METHOD,
+    VARIABLE,
+    FIELD
+  }
+
   interface NullabilityData {
     @Nullable
     AnnotationInstance annotation();
@@ -117,6 +125,10 @@ public interface SymbolMetadata {
     NullabilityLevel level();
 
     boolean isNonNull(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue);
+
+    boolean isNullable(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue);
+
+    boolean isStrongNullable(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue);
   }
 
 }

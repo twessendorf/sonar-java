@@ -19,18 +19,24 @@
  */
 package org.sonar.java.model;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.sonar.plugins.java.api.semantic.Symbol;
 import org.sonar.plugins.java.api.semantic.SymbolMetadata;
-
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import org.sonar.plugins.java.api.tree.Tree;
+
+import static org.sonar.java.model.JSymbolMetadataNullabilityHelper.getNullabilityDataAtLevel;
 
 final class JSymbolMetadata implements SymbolMetadata {
 
@@ -46,10 +52,7 @@ final class JSymbolMetadata implements SymbolMetadata {
    */
   private List<AnnotationInstance> annotations;
 
-  /**
-   * Cache for {@link #nullabilityData()}.
-   */
-  private NullabilityData nullabilityData;
+  private final Map<NullabilityTarget, NullabilityData> nullabilityCache = new HashMap<>();
 
   JSymbolMetadata(JSema sema, Symbol symbol, IAnnotationBinding[] annotationBindings) {
     this.sema = Objects.requireNonNull(sema);
@@ -99,24 +102,61 @@ final class JSymbolMetadata implements SymbolMetadata {
 
   @Override
   public NullabilityData nullabilityData() {
-    if (nullabilityData == null) {
-      nullabilityData = resolveNullability();
+    NullabilityTarget target = getTarget(symbol);
+    if (target == null) {
+      return UNKNOWN_NULLABILITY;
     }
-    return nullabilityData;
+    return nullabilityData(target);
   }
 
-  private NullabilityData resolveNullability() {
+  @Override
+  public NullabilityData nullabilityData(NullabilityTarget target) {
+    return nullabilityCache.computeIfAbsent(target, this::resolveNullability);
+  }
+
+  private NullabilityData resolveNullability(NullabilityTarget target) {
     if (symbol.isUnknown()) {
       return UNKNOWN_NULLABILITY;
     }
 
-    //annotations()
+    NullabilityLevel currentLevel = getLevel(symbol);
+    Optional<NullabilityData> nullabilityDataAtLevel = getNullabilityDataAtLevel(this, currentLevel, target);
+    if (nullabilityDataAtLevel.isPresent()) {
+      return nullabilityDataAtLevel.get();
+    }
 
+    // Not annotated or meta annotated, check upper level...
     if (symbol.isPackageSymbol()) {
       return UNKNOWN_NULLABILITY;
     }
     Symbol owner = symbol.owner();
-    return owner == null ? UNKNOWN_NULLABILITY : owner.metadata().nullabilityData();
+    return owner == null ? UNKNOWN_NULLABILITY : owner.metadata().nullabilityData(target);
+  }
+
+  private static NullabilityLevel getLevel(Symbol symbol) {
+    if (symbol.isVariableSymbol()) {
+      return NullabilityLevel.VARIABLE;
+    } else if (symbol.isMethodSymbol()) {
+      return NullabilityLevel.METHOD;
+    } else if (symbol.isTypeSymbol()) {
+      return NullabilityLevel.CLASS;
+    } else if (symbol.isPackageSymbol()) {
+      return NullabilityLevel.PACKAGE;
+    }
+    return NullabilityLevel.UNKNOWN;
+  }
+
+  @CheckForNull
+  private static NullabilityTarget getTarget(Symbol symbol) {
+    if (symbol.isMethodSymbol()) {
+      return NullabilityTarget.METHOD;
+    } else if (symbol.isVariableSymbol()) {
+      Symbol owner = symbol.owner();
+      if (owner != null) {
+        return owner.isTypeSymbol() ? NullabilityTarget.FIELD : NullabilityTarget.VARIABLE;
+      }
+    }
+    return null;
   }
 
   static final class JNullabilityData implements NullabilityData {
@@ -142,12 +182,27 @@ final class JSymbolMetadata implements SymbolMetadata {
 
     @Override
     public boolean isNonNull(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue) {
+      return testNullabilityType(minLevel, ignoreMetaAnnotation, defaultValue, t -> t == NullabilityType.NON_NULL);
+    }
+
+    @Override
+    public boolean isNullable(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue) {
+      return testNullabilityType(minLevel, ignoreMetaAnnotation, defaultValue,
+        t -> t == NullabilityType.STRONG_NULLABLE || t == NullabilityType.WEAK_NULLABLE);
+    }
+
+    @Override
+    public boolean isStrongNullable(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue) {
+      return testNullabilityType(minLevel, ignoreMetaAnnotation, defaultValue, t -> t == NullabilityType.STRONG_NULLABLE);
+    }
+
+    private boolean testNullabilityType(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue, Predicate<NullabilityType> typePredicate) {
       if (type == NullabilityType.UNKNOWN || (ignoreMetaAnnotation && metaAnnotation)) {
         return defaultValue;
-      } else if (type != NullabilityType.NON_NULL) {
-        return false;
+      } else if (typePredicate.test(type)) {
+        return minLevel.ordinal() <= level.ordinal();
       }
-      return minLevel.ordinal() <= level.ordinal();
+      return false;
     }
 
     @Nullable
