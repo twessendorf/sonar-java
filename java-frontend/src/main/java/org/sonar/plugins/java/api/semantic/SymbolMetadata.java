@@ -21,6 +21,8 @@ package org.sonar.plugins.java.api.semantic;
 
 import javax.annotation.CheckForNull;
 import java.util.List;
+import javax.annotation.Nullable;
+import org.sonar.plugins.java.api.tree.Tree;
 
 /**
  * Holds the metadata information (annotations) of a symbol.
@@ -48,6 +50,8 @@ public interface SymbolMetadata {
    * @return A list of {@link AnnotationInstance}
    */
   List<AnnotationInstance> annotations();
+
+  NullabilityData nullabilityData();
 
   /**
    * Occurrence of an annotation on a symbol.
@@ -88,5 +92,31 @@ public interface SymbolMetadata {
 
   }
 
+  enum NullabilityType {
+    UNKNOWN,
+    STRONG_NULLABLE,
+    WEAK_NULLABLE,
+    NON_NULL
+  }
+
+  enum NullabilityLevel {
+    UNKNOWN,
+    PACKAGE,
+    CLASS,
+    METHOD,
+    VARIABLE
+  }
+
+  interface NullabilityData {
+    @Nullable
+    AnnotationInstance annotation();
+
+    @Nullable
+    Tree declaration();
+
+    NullabilityLevel level();
+
+    boolean isNonNull(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue);
+  }
 
 }

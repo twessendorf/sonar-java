@@ -65,6 +65,11 @@ public class Symbols {
     public List<AnnotationInstance> annotations() {
       return Collections.emptyList();
     }
+
+    @Override
+    public NullabilityData nullabilityData() {
+      return JSymbolMetadata.UNKNOWN_NULLABILITY;
+    }
   };
 
   public abstract static class DefaultSymbol implements Symbol {

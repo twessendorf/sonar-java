@@ -30,10 +30,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.sonar.plugins.java.api.tree.Tree;
 
 final class JSymbolMetadata implements SymbolMetadata {
 
+  public static final NullabilityData UNKNOWN_NULLABILITY = new JNullabilityData(
+    NullabilityType.UNKNOWN, NullabilityLevel.UNKNOWN, null, false);
+
   private final JSema sema;
+  private final Symbol symbol;
   private final IAnnotationBinding[] annotationBindings;
 
   /**
@@ -41,13 +46,20 @@ final class JSymbolMetadata implements SymbolMetadata {
    */
   private List<AnnotationInstance> annotations;
 
-  JSymbolMetadata(JSema sema, IAnnotationBinding[] annotationBindings) {
+  /**
+   * Cache for {@link #nullabilityData()}.
+   */
+  private NullabilityData nullabilityData;
+
+  JSymbolMetadata(JSema sema, Symbol symbol, IAnnotationBinding[] annotationBindings) {
     this.sema = Objects.requireNonNull(sema);
+    this.symbol = symbol;
     this.annotationBindings = annotationBindings;
   }
 
-  JSymbolMetadata(JSema sema, IAnnotationBinding[] typeAnnotationBindings, IAnnotationBinding[] annotationBindings) {
+  JSymbolMetadata(JSema sema, Symbol symbol, IAnnotationBinding[] typeAnnotationBindings, IAnnotationBinding[] annotationBindings) {
     this.sema = Objects.requireNonNull(sema);
+    this.symbol = symbol;
     this.annotationBindings = new IAnnotationBinding[typeAnnotationBindings.length + annotationBindings.length];
     System.arraycopy(typeAnnotationBindings, 0, this.annotationBindings, 0, typeAnnotationBindings.length);
     System.arraycopy(annotationBindings, 0, this.annotationBindings, typeAnnotationBindings.length, annotationBindings.length);
@@ -83,6 +95,75 @@ final class JSymbolMetadata implements SymbolMetadata {
       }
     }
     return null;
+  }
+
+  @Override
+  public NullabilityData nullabilityData() {
+    if (nullabilityData == null) {
+      nullabilityData = resolveNullability();
+    }
+    return nullabilityData;
+  }
+
+  private NullabilityData resolveNullability() {
+    if (symbol.isUnknown()) {
+      return UNKNOWN_NULLABILITY;
+    }
+
+    //annotations()
+
+    if (symbol.isPackageSymbol()) {
+      return UNKNOWN_NULLABILITY;
+    }
+    Symbol owner = symbol.owner();
+    return owner == null ? UNKNOWN_NULLABILITY : owner.metadata().nullabilityData();
+  }
+
+  static final class JNullabilityData implements NullabilityData {
+
+    private final NullabilityType type;
+    private final NullabilityLevel level;
+
+    @Nullable
+    private final AnnotationInstance annotation;
+    private final boolean metaAnnotation;
+
+    public JNullabilityData(NullabilityType type, NullabilityLevel level, @Nullable AnnotationInstance annotation, boolean metaAnnotation) {
+      this.type = type;
+      this.level = level;
+      this.annotation = annotation;
+      this.metaAnnotation = metaAnnotation;
+    }
+
+    @Override
+    public NullabilityLevel level() {
+      return level;
+    }
+
+    @Override
+    public boolean isNonNull(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue) {
+      if (type == NullabilityType.UNKNOWN || (ignoreMetaAnnotation && metaAnnotation)) {
+        return defaultValue;
+      } else if (type != NullabilityType.NON_NULL) {
+        return false;
+      }
+      return minLevel.ordinal() <= level.ordinal();
+    }
+
+    @Nullable
+    @Override
+    public AnnotationInstance annotation() {
+      return annotation;
+    }
+
+    @Nullable
+    @Override
+    public Tree declaration() {
+      if (annotation == null) {
+        return null;
+      }
+      return annotation.symbol().declaration();
+    }
   }
 
   static final class JAnnotationInstance implements AnnotationInstance {

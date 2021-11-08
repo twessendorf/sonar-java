@@ -21,6 +21,7 @@ package org.sonar.java.model;
 
 import org.junit.jupiter.api.Test;
 import org.sonar.java.model.declaration.ClassTreeImpl;
+import org.sonar.plugins.java.api.semantic.SymbolMetadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,6 +35,17 @@ class JSymbolMetadataTest {
     assertThat(value).hasSize(2);
     assertThat(((JVariableSymbol) value[0]).isEnum()).isTrue();
     assertThat(((JVariableSymbol) value[1]).isEnum()).isTrue();
+  }
+
+  @Test
+  void unknown_nullability() {
+    JavaTree.CompilationUnitTreeImpl cu = test("class A {}");
+    ClassTreeImpl c = (ClassTreeImpl) cu.types().get(0);
+    SymbolMetadata.NullabilityData nullabilityData = c.symbol().metadata().nullabilityData();
+    assertThat(nullabilityData.isNonNull(SymbolMetadata.NullabilityLevel.PACKAGE, false, false)).isFalse();
+    assertThat(nullabilityData.annotation()).isNull();
+    assertThat(nullabilityData.level()).isEqualTo(SymbolMetadata.NullabilityLevel.UNKNOWN);
+    assertThat(nullabilityData.declaration()).isNull();
   }
 
   private static JavaTree.CompilationUnitTreeImpl test(String source) {
