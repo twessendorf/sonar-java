@@ -197,7 +197,7 @@ public class JSymbolMetadataNullabilityHelper {
   }
 
   private static void configureAnnotation(String name, NullabilityType type, List<NullabilityTarget> targets, List<NullabilityLevel> levels) {
-    configureAnnotation(annotation -> annotationType(annotation).name().equals(name) ? type : null, targets, levels);
+    configureAnnotation(annotation -> annotationType(annotation).fullyQualifiedName().equals(name) ? type : null, targets, levels);
   }
 
   private static void configureAnnotation(Function<AnnotationInstance, NullabilityType> typeFromAnnotation, List<NullabilityTarget> targets, List<NullabilityLevel> levels) {

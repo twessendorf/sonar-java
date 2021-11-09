@@ -178,6 +178,11 @@ final class JSymbolMetadata implements SymbolMetadata {
     }
 
     @Override
+    public NullabilityType type() {
+      return type;
+    }
+
+    @Override
     public NullabilityLevel level() {
       return level;
     }

@@ -122,6 +122,8 @@ public interface SymbolMetadata {
     @Nullable
     Tree declaration();
 
+    NullabilityType type();
+
     NullabilityLevel level();
 
     boolean isNonNull(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue);
