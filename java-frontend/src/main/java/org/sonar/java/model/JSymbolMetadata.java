@@ -116,11 +116,12 @@ final class JSymbolMetadata implements SymbolMetadata {
 
   private NullabilityData resolveNullability(NullabilityTarget target) {
     if (symbol.isUnknown()) {
+      // TODO: remove?
       return UNKNOWN_NULLABILITY;
     }
 
     NullabilityLevel currentLevel = getLevel(symbol);
-    Optional<NullabilityData> nullabilityDataAtLevel = getNullabilityDataAtLevel(this, currentLevel, target);
+    Optional<NullabilityData> nullabilityDataAtLevel = getNullabilityDataAtLevel(this, target, currentLevel);
     if (nullabilityDataAtLevel.isPresent()) {
       return nullabilityDataAtLevel.get();
     }
@@ -151,9 +152,10 @@ final class JSymbolMetadata implements SymbolMetadata {
     if (symbol.isMethodSymbol()) {
       return NullabilityTarget.METHOD;
     } else if (symbol.isVariableSymbol()) {
+      // TODO: local variable
       Symbol owner = symbol.owner();
       if (owner != null) {
-        return owner.isTypeSymbol() ? NullabilityTarget.FIELD : NullabilityTarget.VARIABLE;
+        return owner.isTypeSymbol() ? NullabilityTarget.FIELD : NullabilityTarget.PARAMETER;
       }
     }
     return null;

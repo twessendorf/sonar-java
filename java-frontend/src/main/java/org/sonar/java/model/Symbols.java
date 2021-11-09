@@ -70,6 +70,11 @@ public class Symbols {
     public NullabilityData nullabilityData() {
       return JSymbolMetadata.UNKNOWN_NULLABILITY;
     }
+
+    @Override
+    public NullabilityData nullabilityData(NullabilityTarget level) {
+      return JSymbolMetadata.UNKNOWN_NULLABILITY;
+    }
   };
 
   public abstract static class DefaultSymbol implements Symbol {

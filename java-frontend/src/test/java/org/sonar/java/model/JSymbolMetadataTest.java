@@ -51,7 +51,6 @@ class JSymbolMetadataTest {
   }
 
   @Test
-  @javax.annotation.Nonnull
   void parameter_directly_annotated_non_null() {
     JavaTree.CompilationUnitTreeImpl cu = test("class A { void f(@javax.annotation.Nonnull int a) {} }");
     ClassTreeImpl c = (ClassTreeImpl) cu.types().get(0);

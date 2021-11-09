@@ -111,7 +111,7 @@ public interface SymbolMetadata {
 
   enum NullabilityTarget {
     METHOD,
-    VARIABLE,
+    PARAMETER,
     FIELD
   }
 
