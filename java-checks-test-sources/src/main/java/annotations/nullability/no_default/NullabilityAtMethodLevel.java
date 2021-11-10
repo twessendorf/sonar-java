@@ -1,60 +1,58 @@
 package annotations.nullability.no_default;
 
-import java.util.function.Predicate;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.eclipse.jdt.annotation.DefaultLocation;
 
+/**
+ * Test Nullability annotation when the element is indirectly annotated, via method annotation
+ */
 public class NullabilityAtMethodLevel {
 
-  Object id01_type_UNKNOWN;
+  Object id2000_type_UNKNOWN_level_UNKNOWN;
 
-  @Nullable
-  Object id02_type_WEAK_NULLABLE_line_14;
-
-  @CheckForNull
-  public Object id03_type_STRONG_NULLABLE_line_16;
-
-  @ParametersAreNonnullByDefault
-  public Object id04_type_NON_NULL_level_METHOD_line_19( // TODO should be UNKNOWN !!!
-    Object id05_type_NON_NULL_level_METHOD_line_19,
-    @Nullable Object id06_type_WEAK_NULLABLE_line_21,
-    @CheckForNull Object id07_type_STRONG_NULLABLE_line_23,
-    @Nonnull Object id08_type_NON_NULL_line_24) {
-
-    Object id09_type_NON_NULL; // TODO should be UNKNOWN !!!
-    @Nullable
-    Object id10_type_WEAK_NULLABLE_line_27;
-    @CheckForNull
-    Object id11_type_STRONG_NULLABLE_line_29;
-    @Nonnull
-    Object id12_type_NON_NULL_line_31;
-
-    Predicate<String> p1 = id13_type_UNKNOWN -> false;
-
-    Predicate<String> p2 = (@Nullable String id14_type_WEAK_NULLABLE_line_36) -> false;
-
-    return null;
+  public Object id2001_type_UNKNOWN_level_UNKNOWN(
+    Object id2002_type_UNKNOWN_level_UNKNOWN) {
+    return new Object();
   }
 
-  @Nullable
-  public Object id15_type_WEAK_NULLABLE_line_41(
-    Object id16_type_UNKNOWN,
-    @CheckForNull Object id17_type_STRONG_NULLABLE_line_44) {
-
-    Object id18_type_UNKNOWN;
-    return null;
+  // ============== Method level annotations changing the nullability value of parameters ==============
+  @javax.annotation.ParametersAreNonnullByDefault
+  public Object id2003_type_UNKNOWN_level_UNKNOWN(
+    Object id2004_type_NON_NULL_level_METHOD) {
+    return new Object();
   }
 
-  @CheckForNull
-  public Object id19_type_STRONG_NULLABLE_line_50(
-    Object id20_type_UNKNOWN,
-    @Nullable Object id21_type_WEAK_NULLABLE_line_53) {
+  @org.eclipse.jdt.annotation.NonNullByDefault
+  public Object id2005_type_NON_NULL_level_METHOD(
+    Object id2006_type_NON_NULL_level_METHOD) {
+    return new Object();
+  }
 
-    Object id22_type_UNKNOWN;
+  @org.eclipse.jdt.annotation.NonNullByDefault(DefaultLocation.PARAMETER)
+  public Object id2007_type_UNKNOWN_level_UNKNOWN(
+    Object id2008_type_NON_NULL_level_METHOD) {
+    return new Object();
+  }
 
-    return null;
+  @org.eclipse.jdt.annotation.NonNullByDefault(DefaultLocation.FIELD)
+  public Object id2009_type_UNKNOWN_level_UNKNOWN(
+    Object id2010_type_UNKNOWN_level_UNKNOWN) {
+    return new Object();
+  }
+
+  // ============== VARIABLE level annotations have the priority over METHOD level ==============
+  @javax.annotation.ParametersAreNonnullByDefault
+  public Object id2011_type_UNKNOWN_level_UNKNOWN(
+    @javax.annotation.Nullable Object id2012_type_WEAK_NULLABLE_level_VARIABLE,
+    @javax.annotation.CheckForNull Object id2013_type_STRONG_NULLABLE_level_VARIABLE) {
+    return new Object();
+  }
+
+  // ============== annotations targeting method have no effects on parameters ==============
+  @javax.annotation.Nullable
+  public Object id2014_type_WEAK_NULLABLE_level_METHOD(
+    Object id2015_type_UNKNOWN_level_UNKNOWN,
+    @javax.annotation.CheckForNull Object id2016_type_STRONG_NULLABLE_level_VARIABLE) {
+    return new Object();
   }
 
 }

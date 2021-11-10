@@ -147,6 +147,7 @@ public class JSymbolMetadataNullabilityHelper {
 
   /**
    * Target fields only.
+   * Only at package level.
    */
   private static final String ORG_SPRINGFRAMEWORK_LANG_NON_NULL_FIELDS = "org.springframework.lang.NonNullFields";
 
@@ -185,9 +186,9 @@ public class JSymbolMetadataNullabilityHelper {
       Collections.singletonList(PARAMETER), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
 
     configureAnnotation(ORG_SPRINGFRAMEWORK_LANG_NON_NULL_FIELDS, NON_NULL,
-      Collections.singletonList(FIELD), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
+      Collections.singletonList(FIELD), Collections.singletonList(PACKAGE));
 
-    // ORG_ECLIPSE_JDT_ANNOTATION_NON_NULL_BY_DEFAULT specific case
+    // ORG_ECLIPSE_JDT_ANNOTATION_NON_NULL_BY_DEFAULT specific case (targeting both high and low level)
     configureAnnotation(annotationInstance -> getIfEclipseNonNullByDefault(annotationInstance, "PARAMETER"),
       Collections.singletonList(PARAMETER), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
     configureAnnotation(annotationInstance -> getIfEclipseNonNullByDefault(annotationInstance, "FIELD"),
