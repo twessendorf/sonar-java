@@ -116,7 +116,6 @@ public class JSymbolMetadataNullabilityHelper {
     "edu.umd.cs.findbugs.annotations.NonNull",
     "io.reactivex.annotations.NonNull",
     "io.reactivex.rxjava3.annotations.NonNull",
-    "javax.annotation.Nonnull",
     "javax.validation.constraints.NotNull",
     "lombok.NonNull",
     "org.checkerframework.checker.nullness.compatqual.NonNullDecl",
@@ -129,6 +128,14 @@ public class JSymbolMetadataNullabilityHelper {
     "org.netbeans.api.annotations.common.NonNull",
     "org.springframework.lang.NonNull",
     "reactor.util.annotation.NonNull");
+
+  /**
+   * Can have different type depending on the argument "when" value:
+   * - ALWAYS or no argument = NONNULL
+   * - NEVER or MAYBE = STRONG_NULLABLE
+   * - UNKNOWN = WEAK_NULLABLE
+   */
+  private static final String JAVAX_ANNOTATION_NONNULL = "javax.annotation.Nonnull";
 
   /**
    * Target parameters and return values.
@@ -174,6 +181,12 @@ public class JSymbolMetadataNullabilityHelper {
     configureAnnotation(JSymbolMetadataNullabilityHelper::getIfNonNull,
       Arrays.asList(PARAMETER, FIELD), Collections.singletonList(VARIABLE));
     configureAnnotation(JSymbolMetadataNullabilityHelper::getIfNonNull,
+      Collections.singletonList(METHOD), Collections.singletonList(NullabilityLevel.METHOD));
+
+    // Low level: javax.NonNull specific case
+    configureAnnotation(JSymbolMetadataNullabilityHelper::getTypeFromNonNull,
+      Arrays.asList(PARAMETER, FIELD), Collections.singletonList(VARIABLE));
+    configureAnnotation(JSymbolMetadataNullabilityHelper::getTypeFromNonNull,
       Collections.singletonList(METHOD), Collections.singletonList(NullabilityLevel.METHOD));
 
     // High level annotation
@@ -269,7 +282,7 @@ public class JSymbolMetadataNullabilityHelper {
 
   @CheckForNull
   private static NullabilityType getIfStrongNullable(AnnotationInstance annotation) {
-    if (isStrongNullableAnnotation(annotationType(annotation)) || isNullableThroughNonNull(annotation, "MAYBE")) {
+    if (isStrongNullableAnnotation(annotationType(annotation))) {
       return STRONG_NULLABLE;
     }
     return null;
@@ -281,7 +294,7 @@ public class JSymbolMetadataNullabilityHelper {
 
   @CheckForNull
   private static NullabilityType getIfNullable(AnnotationInstance annotation) {
-    if (isNullableAnnotation(annotationType(annotation)) || isNullableThroughNonNull(annotation, "UNKNOWN")) {
+    if (isNullableAnnotation(annotationType(annotation))) {
       return WEAK_NULLABLE;
     }
     return null;
@@ -303,9 +316,21 @@ public class JSymbolMetadataNullabilityHelper {
     return NONNULL_ANNOTATIONS.contains(type.fullyQualifiedName());
   }
 
-  private static boolean isNullableThroughNonNull(AnnotationInstance annotation, String whenExpectedValue) {
-    return "javax.annotation.Nonnull".equals(annotationType(annotation).fullyQualifiedName()) &&
-      !annotation.values().isEmpty() && checkAnnotationParameter(annotation.values(), "when", whenExpectedValue);
+
+  @CheckForNull
+  private static NullabilityType getTypeFromNonNull(AnnotationInstance annotation) {
+    if (JAVAX_ANNOTATION_NONNULL.equals(annotationType(annotation).fullyQualifiedName())) {
+      List<AnnotationValue> values = annotation.values();
+      if (values.isEmpty() || checkAnnotationParameter(values, "when", "ALWAYS")) {
+        return NON_NULL;
+      } else if (checkAnnotationParameter(values, "when", "UNKNOWN")) {
+        return WEAK_NULLABLE;
+      } else {
+        // when=NEVER or when=MAYBE
+        return STRONG_NULLABLE;
+      }
+    }
+    return null;
   }
 
   @CheckForNull
