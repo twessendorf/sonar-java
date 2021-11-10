@@ -131,7 +131,7 @@ class JSymbolMetadataTest {
       }
       NullabilityType expectedType = NullabilityType.valueOf(matcher.group("type"));
       String levelValue = matcher.group("level");
-      NullabilityLevel expectedLevel = levelValue != null ? NullabilityLevel.valueOf(levelValue) : null;
+      NullabilityLevel expectedLevel = levelValue != null ? NullabilityLevel.valueOf(levelValue) : NullabilityLevel.UNKNOWN;
       String expectedLine = matcher.group("line");
 
       assertNullability(symbol, expectedType, expectedLevel, expectedLine, "\nFile: " + sourceFile.toRealPath() + "\n");
