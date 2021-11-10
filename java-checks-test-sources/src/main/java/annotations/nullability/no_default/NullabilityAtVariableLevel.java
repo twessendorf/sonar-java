@@ -180,4 +180,50 @@ public class NullabilityAtVariableLevel {
   Object id1063_type_WEAK_NULLABLE_level_VARIABLE;
   @Nonnull
   Object id1064_type_NON_NULL_level_VARIABLE;
+
+  // ============== Return values of methods and arguments support the same set of annotation ==============
+  @edu.umd.cs.findbugs.annotations.CheckForNull
+  public Object id1065_type_STRONG_NULLABLE_level_METHOD(
+    // Annotations on method does not impact arguments
+    Object id1066_type_UNKNOWN,
+    @edu.umd.cs.findbugs.annotations.CheckForNull Object id1067_type_STRONG_NULLABLE_level_VARIABLE
+  ) {
+    return new Object();
+  }
+
+  @org.jetbrains.annotations.Nullable
+  public Object id1068_type_WEAK_NULLABLE_level_METHOD(
+    // Annotations on method does not impact arguments
+    Object id1069_type_UNKNOWN,
+    @org.jetbrains.annotations.Nullable Object id1070_type_WEAK_NULLABLE_level_VARIABLE
+  ) {
+    return new Object();
+  }
+
+  @org.eclipse.jgit.annotations.NonNull
+  public Object id1071_type_NON_NULL_level_METHOD(
+    // Annotations on method does not impact arguments
+    Object id1072_type_UNKNOWN,
+    @org.eclipse.jgit.annotations.NonNull Object id1073_type_NON_NULL_level_VARIABLE
+  ) {
+    return new Object();
+  }
+
+  // ============== "NonNullByDefault" by eclipse can also apply to methods or arguments ==============
+  @org.eclipse.jdt.annotation.NonNullByDefault(DefaultLocation.RETURN_TYPE)
+  public Object id1074_type_NON_NULL_level_METHOD(
+    // Annotations on method does not impact arguments
+    Object id1075_type_UNKNOWN,
+    @org.eclipse.jdt.annotation.NonNullByDefault(DefaultLocation.PARAMETER) Object id1076_type_NON_NULL_level_VARIABLE
+  ) {
+    return new Object();
+  }
+
+  public Object id1077_type_UNKNOWN(
+    Object id1078_type_UNKNOWN,
+    @org.eclipse.jdt.annotation.NonNullByDefault(DefaultLocation.PARAMETER) Object id1079_type_NON_NULL_level_VARIABLE
+  ) {
+    return new Object();
+  }
+
 }
