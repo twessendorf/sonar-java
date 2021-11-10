@@ -1,5 +1,6 @@
 package annotations.nullability.no_default;
 
+import javax.annotation.Nonnull;
 import org.eclipse.jdt.annotation.DefaultLocation;
 
 /**
@@ -52,6 +53,20 @@ public class NullabilityAtMethodLevel {
   public Object id2014_type_WEAK_NULLABLE_level_METHOD(
     Object id2015_type_UNKNOWN_level_UNKNOWN,
     @javax.annotation.CheckForNull Object id2016_type_STRONG_NULLABLE_level_VARIABLE) {
+    return new Object();
+  }
+
+  // ============== ParametersAreNullableByDefault ==============
+  @javax.annotation.ParametersAreNullableByDefault
+  public Object id2017_type_UNKNOWN_level_UNKNOWN(
+    Object id2018_type_WEAK_NULLABLE_level_METHOD) {
+    return new Object();
+  }
+
+  @javax.annotation.ParametersAreNullableByDefault
+  public Object id2019_type_UNKNOWN_level_UNKNOWN(
+    // Variable level has the priority
+    @Nonnull Object id2020_type_NON_NULL_level_VARIABLE) {
     return new Object();
   }
 

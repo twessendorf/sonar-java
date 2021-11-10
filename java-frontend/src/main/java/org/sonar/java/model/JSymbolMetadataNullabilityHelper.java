@@ -155,6 +155,11 @@ public class JSymbolMetadataNullabilityHelper {
   private static final String JAVAX_ANNOTATION_PARAMETERS_ARE_NONNULL_BY_DEFAULT = "javax.annotation.ParametersAreNonnullByDefault";
 
   /**
+   * Target parameters only.
+   */
+  private static final String JAVAX_ANNOTATION_PARAMETERS_ARE_NULLABLE_BY_DEFAULT = "javax.annotation.ParametersAreNullableByDefault";
+
+  /**
    * Target fields only.
    * Only at package level.
    */
@@ -203,6 +208,8 @@ public class JSymbolMetadataNullabilityHelper {
 
     configureAnnotation(JAVAX_ANNOTATION_PARAMETERS_ARE_NONNULL_BY_DEFAULT, NON_NULL,
       Collections.singletonList(PARAMETER), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
+    configureAnnotation(JAVAX_ANNOTATION_PARAMETERS_ARE_NULLABLE_BY_DEFAULT, WEAK_NULLABLE,
+      Collections.singletonList(PARAMETER), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
 
     configureAnnotation(ORG_SPRINGFRAMEWORK_LANG_NON_NULL_FIELDS, NON_NULL,
       Collections.singletonList(FIELD), Collections.singletonList(PACKAGE));
@@ -220,6 +227,7 @@ public class JSymbolMetadataNullabilityHelper {
     KNOWN_ANNOTATIONS.add(COM_MONGO_DB_LANG_NON_NULL_API);
     KNOWN_ANNOTATIONS.add(ORG_SPRINGFRAMEWORK_LANG_NON_NULL_API);
     KNOWN_ANNOTATIONS.add(JAVAX_ANNOTATION_PARAMETERS_ARE_NONNULL_BY_DEFAULT);
+    KNOWN_ANNOTATIONS.add(JAVAX_ANNOTATION_PARAMETERS_ARE_NULLABLE_BY_DEFAULT);
     KNOWN_ANNOTATIONS.add(ORG_SPRINGFRAMEWORK_LANG_NON_NULL_FIELDS);
     KNOWN_ANNOTATIONS.add(ORG_ECLIPSE_JDT_ANNOTATION_NON_NULL_BY_DEFAULT);
   }

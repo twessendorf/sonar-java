@@ -1,5 +1,6 @@
 package annotations.nullability.no_default;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.eclipse.jdt.annotation.DefaultLocation;
 
@@ -104,6 +105,24 @@ class NullabilityAtClassLevel7 {
 
   public Object id3025_type_UNKNOWN(
     Object id3026_type_UNKNOWN) {
+    return new Object();
+  }
+}
+
+@javax.annotation.ParametersAreNullableByDefault
+class NullabilityAtClassLevel8 {
+  // No effect on fields
+  Object id3026_type_UNKNOWN;
+
+  // No effects on methods return value
+  public Object id3027_type_UNKNOWN(
+    Object id3028_type_WEAK_NULLABLE_level_CLASS) {
+    return new Object();
+  }
+
+  public Object id3029_type_UNKNOWN_level_UNKNOWN(
+    // Variable level has priority
+    @Nonnull Object id3030_type_NON_NULL_level_VARIABLE) {
     return new Object();
   }
 }
