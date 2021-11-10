@@ -85,11 +85,45 @@ class JSymbolMetadataTest {
   }
 
   @Test
-  void package_level_nullability() throws IOException {
-    int expectedIdentifierAssertionCount = 14;
+  void package_level_eclipse_jdt_non_null_by_default() throws IOException {
     assertNullability(
-      NULLABILITY_SOURCE_DIR.resolve(Paths.get("nullable_by_default", "NullabilityAtPackageLevel.java")),
-      expectedIdentifierAssertionCount);
+      NULLABILITY_SOURCE_DIR.resolve(Paths.get("eclipse_jdt_non_null_by_default", "NullabilityAtPackageLevel.java")),
+      14);
+  }
+
+  @Test
+  void package_level_javax_non_null_by_default() throws IOException {
+    assertNullability(
+      NULLABILITY_SOURCE_DIR.resolve(Paths.get("javax_non_null_by_default", "NullabilityAtPackageLevel.java")),
+      14);
+  }
+
+  @Test
+  void package_level_javax_nullable_by_default() throws IOException {
+    assertNullability(
+      NULLABILITY_SOURCE_DIR.resolve(Paths.get("javax_nullable_by_default", "NullabilityAtPackageLevel.java")),
+      14);
+  }
+
+  @Test
+  void package_level_mongo_db_non_null_api() throws IOException {
+    assertNullability(
+      NULLABILITY_SOURCE_DIR.resolve(Paths.get("mongo_db_non_null_api", "NullabilityAtPackageLevel.java")),
+      14);
+  }
+
+  @Test
+  void package_level_spring_non_null_api() throws IOException {
+    assertNullability(
+      NULLABILITY_SOURCE_DIR.resolve(Paths.get("spring_non_null_api", "NullabilityAtPackageLevel.java")),
+      14);
+  }
+
+  @Test
+  void package_level_spring_non_null_fields() throws IOException {
+    assertNullability(
+      NULLABILITY_SOURCE_DIR.resolve(Paths.get("spring_non_null_fields", "NullabilityAtPackageLevel.java")),
+      14);
   }
 
   @Test
@@ -139,7 +173,7 @@ class JSymbolMetadataTest {
   }
 
   private static void assertNullability(Symbol symbol, NullabilityType expectedType,
-    @Nullable NullabilityLevel expectedLevel, @Nullable String expectedLine, String context) {
+                                        @Nullable NullabilityLevel expectedLevel, @Nullable String expectedLine, String context) {
 
     String symbolContext = "for symbol: " + symbol.name() + " in " + context;
     SymbolMetadata.NullabilityData nullabilityData = symbol.metadata().nullabilityData();
