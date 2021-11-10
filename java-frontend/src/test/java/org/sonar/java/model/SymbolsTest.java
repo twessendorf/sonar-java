@@ -26,6 +26,7 @@ import org.sonar.plugins.java.api.semantic.Type;
 import org.sonar.plugins.java.api.semantic.Type.Primitives;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.sonar.java.model.JSymbolMetadata.UNKNOWN_NULLABILITY;
 
 class SymbolsTest {
 
@@ -65,6 +66,10 @@ class SymbolsTest {
     assertThat(metadata.annotations()).isEmpty();
     assertThat(metadata.isAnnotatedWith("whatever")).isFalse();
     assertThat(metadata.valuesForAnnotation("whatever")).isNull();
+
+    // since SonarJava 7.6
+    assertThat(metadata.nullabilityData()).isEqualTo(UNKNOWN_NULLABILITY);
+    assertThat(metadata.nullabilityData(SymbolMetadata.NullabilityTarget.METHOD)).isEqualTo(UNKNOWN_NULLABILITY);
   }
 
   @Test
