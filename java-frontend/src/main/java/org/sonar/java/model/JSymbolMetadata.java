@@ -188,6 +188,11 @@ final class JSymbolMetadata implements SymbolMetadata {
     }
 
     @Override
+    public boolean metaAnnotation() {
+      return metaAnnotation;
+    }
+
+    @Override
     public boolean isNonNull(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue) {
       return testNullabilityType(minLevel, ignoreMetaAnnotation, defaultValue, t -> t == NullabilityType.NON_NULL);
     }

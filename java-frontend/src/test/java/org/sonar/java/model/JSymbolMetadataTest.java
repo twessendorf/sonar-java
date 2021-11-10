@@ -150,6 +150,14 @@ class JSymbolMetadataTest {
       expectedIdentifierAssertionCount);
   }
 
+  @Test
+  void meta_annotation_nullability() throws IOException {
+    int expectedIdentifierAssertionCount = 48;
+    assertNullability(
+      NULLABILITY_SOURCE_DIR.resolve(Paths.get("no_default", "NullabilityWithMetaAnnotation.java")),
+      expectedIdentifierAssertionCount);
+  }
+
   void assertNullability(Path sourceFile, int expectedIdentifierAssertionCount) throws IOException {
     CompilationUnitTree cut = JParserTestUtils.parse(sourceFile.toRealPath().toFile(), JParserTestUtils.checksTestClassPath());
     List<Symbol> idSymbols = collectIdentifiers(cut).stream()
@@ -167,13 +175,15 @@ class JSymbolMetadataTest {
       String levelValue = matcher.group("level");
       NullabilityLevel expectedLevel = levelValue != null ? NullabilityLevel.valueOf(levelValue) : NullabilityLevel.UNKNOWN;
       String expectedLine = matcher.group("line");
+      boolean metaAnnotation = matcher.group("meta") != null;
 
-      assertNullability(symbol, expectedType, expectedLevel, expectedLine, "\nFile: " + sourceFile.toRealPath() + "\n");
+      assertNullability(symbol, expectedType, expectedLevel, expectedLine, metaAnnotation, "\nFile: " + sourceFile.toRealPath() + "\n");
     }
   }
 
   private static void assertNullability(Symbol symbol, NullabilityType expectedType,
-                                        @Nullable NullabilityLevel expectedLevel, @Nullable String expectedLine, String context) {
+                                        @Nullable NullabilityLevel expectedLevel, @Nullable String expectedLine,
+                                        boolean metaAnnotation, String context) {
 
     String symbolContext = "for symbol: " + symbol.name() + " in " + context;
     SymbolMetadata.NullabilityData nullabilityData = symbol.metadata().nullabilityData();
@@ -186,6 +196,7 @@ class JSymbolMetadataTest {
       String actualLine = declaration != null ? Integer.toString(declaration.firstToken().range().start().line()) : "empty";
       // TODO assertThat(actualLine).describedAs(symbolContext).isEqualTo(expectedLine);
     }
+    assertThat(nullabilityData.metaAnnotation()).describedAs(symbolContext + "Meta annotation data is incorrect").isEqualTo(metaAnnotation);
   }
 
   private static List<IdentifierTree> collectIdentifiers(Tree tree) {

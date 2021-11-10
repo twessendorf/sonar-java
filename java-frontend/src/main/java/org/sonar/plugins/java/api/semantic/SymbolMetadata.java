@@ -126,6 +126,8 @@ public interface SymbolMetadata {
 
     NullabilityLevel level();
 
+    boolean metaAnnotation();
+
     boolean isNonNull(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue);
 
     boolean isNullable(NullabilityLevel minLevel, boolean ignoreMetaAnnotation, boolean defaultValue);

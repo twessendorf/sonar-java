@@ -393,18 +393,17 @@ public class JSymbolMetadataNullabilityHelper {
   private static List<AnnotationInstance> collectMetaAnnotations(SymbolMetadata metadata, Set<Type> knownTypes) {
     List<AnnotationInstance> result = new ArrayList<>();
     for (AnnotationInstance annotationInstance : metadata.annotations()) {
-      if (KNOWN_ANNOTATIONS.contains(annotationType(annotationInstance).fullyQualifiedName())) {
-        // Skip known annotations, as we already know the nullability impact and might contain contradicting annotations.
-        continue;
-      }
       Symbol annotationSymbol = annotationInstance.symbol();
       Type annotationType = annotationSymbol.type();
       if (!knownTypes.contains(annotationType)) {
         knownTypes.add(annotationType);
         result.add(annotationInstance);
-        result.addAll(
-          collectMetaAnnotations(annotationSymbol.metadata(), knownTypes)
-        );
+        if (!KNOWN_ANNOTATIONS.contains(annotationType(annotationInstance).fullyQualifiedName())) {
+          // Only do recursion when we face unknown annotations, as we already know the nullability impact and might contain contradicting annotations.
+          result.addAll(
+            collectMetaAnnotations(annotationSymbol.metadata(), knownTypes)
+          );
+        }
       }
     }
     return new ArrayList<>(result);
