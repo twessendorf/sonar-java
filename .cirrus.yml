@@ -67,21 +67,24 @@ ws_scan_task:
   <<: *ONLY_SONARSOURCE_QA
   gke_container:
     <<: *CONTAINER_DEFINITION
-    cpu: 2
-    memory: 2G
+    image: gcr.io/language-team/base-jdk16:latest
+    cpu: 4
+    memory: 8G
+  # run only on master and long-term branches
+  #  only_if: $CIRRUS_USER_COLLABORATOR == 'true' && ($CIRRUS_BRANCH == "master" || $CIRRUS_BRANCH =~ "branch-.*")
   env:
     WS_APIKEY: ENCRYPTED[cda363e6bcac3edd4c259dc05b3570e00152ad50f9ad3ec3cab72d57cda318a0d5472e37c656c3566c2cb8c752d2f5a0]
-    WS_PRODUCTNAME: SonarJava
-    WS_PROJECTNAME: SonarJava
-    WS_EXCLUDES: "**/*sources.jar **/*javadoc.jar **/its/sources/**"
   maven_cache:
     folder: ${CIRRUS_WORKING_DIR}/.m2/repository
   whitesource_script:
     - source cirrus-env QA
     - source set_maven_build_version $BUILD_NUMBER
-    - mvn clean install -DskipTests=true -pl=sonar-java-plugin
-    - ./ws_scan.sh
-  cleanup_before_cache_script: cleanup_maven_repository
+    - mvn clean install -DskipTests
+    - source ws_scan.sh
+  allow_failures: "true"
+  always:
+    ws_artifacts:
+      path: "whitesource/**/*"
 
 qa_os_win_task:
   depends_on:
@@ -182,6 +185,7 @@ ruling_win_task:
 
 promote_task:
   depends_on:
+    - ws_scan
     - qa_os_win
     - sanity
     - ruling
