@@ -139,11 +139,13 @@ public class JSymbolMetadataNullabilityHelper {
 
   /**
    * Target parameters and return values.
+   * Only applicable to package.
    */
   private static final String COM_MONGO_DB_LANG_NON_NULL_API = "com.mongodb.lang.NonNullApi";
 
   /**
    * Target parameters and return values.
+   * Only applicable to package.
    */
   private static final String ORG_SPRINGFRAMEWORK_LANG_NON_NULL_API = "org.springframework.lang.NonNullApi";
 
@@ -163,6 +165,10 @@ public class JSymbolMetadataNullabilityHelper {
    * PARAMETER, RETURN_TYPE, FIELD
    */
   private static final String ORG_ECLIPSE_JDT_ANNOTATION_NON_NULL_BY_DEFAULT = "org.eclipse.jdt.annotation.NonNullByDefault";
+
+  private static final Set<String> KNOWN_ANNOTATIONS = Stream.of(NULLABLE_ANNOTATIONS, NONNULL_ANNOTATIONS)
+      .flatMap(Set::stream)
+      .collect(Collectors.toSet());
 
   private static final Map<ConfigurationKey, TypesForAnnotations> configuration = new HashMap<>();
 
@@ -191,9 +197,9 @@ public class JSymbolMetadataNullabilityHelper {
 
     // High level annotation
     configureAnnotation(COM_MONGO_DB_LANG_NON_NULL_API, NON_NULL,
-      Arrays.asList(METHOD, PARAMETER), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
+      Arrays.asList(METHOD, PARAMETER), Collections.singletonList(PACKAGE));
     configureAnnotation(ORG_SPRINGFRAMEWORK_LANG_NON_NULL_API, NON_NULL,
-      Arrays.asList(METHOD, PARAMETER), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
+      Arrays.asList(METHOD, PARAMETER), Collections.singletonList(PACKAGE));
 
     configureAnnotation(JAVAX_ANNOTATION_PARAMETERS_ARE_NONNULL_BY_DEFAULT, NON_NULL,
       Collections.singletonList(PARAMETER), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
@@ -208,6 +214,14 @@ public class JSymbolMetadataNullabilityHelper {
       Collections.singletonList(FIELD), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
     configureAnnotation(annotationInstance -> getIfEclipseNonNullByDefault(annotationInstance, "RETURN_TYPE"),
       Collections.singletonList(METHOD), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
+
+    // Add all annotations to the set of known annotations
+    KNOWN_ANNOTATIONS.add(JAVAX_ANNOTATION_NONNULL);
+    KNOWN_ANNOTATIONS.add(COM_MONGO_DB_LANG_NON_NULL_API);
+    KNOWN_ANNOTATIONS.add(ORG_SPRINGFRAMEWORK_LANG_NON_NULL_API);
+    KNOWN_ANNOTATIONS.add(JAVAX_ANNOTATION_PARAMETERS_ARE_NONNULL_BY_DEFAULT);
+    KNOWN_ANNOTATIONS.add(ORG_SPRINGFRAMEWORK_LANG_NON_NULL_FIELDS);
+    KNOWN_ANNOTATIONS.add(ORG_ECLIPSE_JDT_ANNOTATION_NON_NULL_BY_DEFAULT);
   }
 
   private static void configureAnnotation(String name, NullabilityType type, List<NullabilityTarget> targets, List<NullabilityLevel> levels) {
@@ -371,6 +385,10 @@ public class JSymbolMetadataNullabilityHelper {
   private static List<AnnotationInstance> collectMetaAnnotations(SymbolMetadata metadata, Set<Type> knownTypes) {
     List<AnnotationInstance> result = new ArrayList<>();
     for (AnnotationInstance annotationInstance : metadata.annotations()) {
+      if (KNOWN_ANNOTATIONS.contains(annotationType(annotationInstance).fullyQualifiedName())) {
+        // Skip known annotations, as we already know the nullability impact and might contain contradicting annotations.
+        continue;
+      }
       Symbol annotationSymbol = annotationInstance.symbol();
       Type annotationType = annotationSymbol.type();
       if (!knownTypes.contains(annotationType)) {
