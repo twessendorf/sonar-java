@@ -209,9 +209,9 @@ public class JSymbolMetadataNullabilityHelper {
 
     // ORG_ECLIPSE_JDT_ANNOTATION_NON_NULL_BY_DEFAULT specific case (targeting both high and low level)
     configureAnnotation(annotationInstance -> getIfEclipseNonNullByDefault(annotationInstance, "PARAMETER"),
-      Collections.singletonList(PARAMETER), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
+      Collections.singletonList(PARAMETER), Arrays.asList(VARIABLE, NullabilityLevel.METHOD, CLASS, PACKAGE));
     configureAnnotation(annotationInstance -> getIfEclipseNonNullByDefault(annotationInstance, "FIELD"),
-      Collections.singletonList(FIELD), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
+      Collections.singletonList(FIELD), Arrays.asList(VARIABLE, NullabilityLevel.METHOD, CLASS, PACKAGE));
     configureAnnotation(annotationInstance -> getIfEclipseNonNullByDefault(annotationInstance, "RETURN_TYPE"),
       Collections.singletonList(METHOD), Arrays.asList(NullabilityLevel.METHOD, CLASS, PACKAGE));
 

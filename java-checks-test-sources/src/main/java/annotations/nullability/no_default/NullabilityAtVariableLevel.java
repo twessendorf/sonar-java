@@ -1,6 +1,10 @@
 package annotations.nullability.no_default;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.meta.When;
+import org.eclipse.jdt.annotation.DefaultLocation;
 
 /**
  * Test Nullability annotation when the element is directly annotated
@@ -120,7 +124,6 @@ public class NullabilityAtVariableLevel {
   @javax.annotation.Nonnull(when = When.UNKNOWN)
   Object id1049_type_WEAK_NULLABLE_level_VARIABLE;
 
-
   // ============== Test priority at the same level ==============
   // Strong nullable has the priority over everything, order does not matter
   @javax.annotation.CheckForNull
@@ -161,4 +164,20 @@ public class NullabilityAtVariableLevel {
   @javax.annotation.Nullable
   @javax.annotation.Nonnull
   Object id1058_type_WEAK_NULLABLE_level_VARIABLE;
+
+  // ============== "NonNullByDefault" by eclipse can also apply to fields ==============
+  @org.eclipse.jdt.annotation.NonNullByDefault
+  Object id1059_type_NON_NULL_level_VARIABLE;
+  @org.eclipse.jdt.annotation.NonNullByDefault(DefaultLocation.FIELD)
+  Object id1060_type_NON_NULL_level_VARIABLE;
+  @org.eclipse.jdt.annotation.NonNullByDefault(DefaultLocation.RETURN_TYPE)
+  Object id1061_type_UNKNOWN_level_UNKNOWN;
+
+  // ============== Should work without fully qualified name ==============
+  @CheckForNull
+  Object id1062_type_STRONG_NULLABLE_level_VARIABLE;
+  @Nullable
+  Object id1063_type_WEAK_NULLABLE_level_VARIABLE;
+  @Nonnull
+  Object id1064_type_NON_NULL_level_VARIABLE;
 }
