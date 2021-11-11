@@ -67,7 +67,6 @@ ws_scan_task:
   <<: *ONLY_SONARSOURCE_QA
   gke_container:
     <<: *CONTAINER_DEFINITION
-    image: gcr.io/language-team/base-jdk16:latest
     cpu: 4
     memory: 8G
   # run only on master and long-term branches
@@ -79,7 +78,7 @@ ws_scan_task:
   whitesource_script:
     - source cirrus-env QA
     - source set_maven_build_version $BUILD_NUMBER
-    - mvn clean install -DskipTests
+    - mvn clean install -DskipTests -pl '!java-checks-test-sources'
     - source ws_scan.sh
   allow_failures: "true"
   always:
